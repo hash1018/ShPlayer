@@ -257,3 +257,17 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
     this->initializedTexture = true;
 
 }
+
+void VideoRenderWidget::update(const uint8_t *buffer, int size){
+
+
+    if(this->buffer!=nullptr)
+        delete [] this->buffer;
+
+    this->buffer= new uint8_t[size];
+
+    memcpy(this->buffer,buffer,size);
+
+    QOpenGLWidget::update();
+
+}

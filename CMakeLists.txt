@@ -47,15 +47,7 @@ else()
 
 endif()
 
-
-if(ANDROID)
-  add_library(ShPlayer SHARED
-    main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-  )
-else()
+if(APPLE)
   add_executable(ShPlayer
     src/main.cpp
     src/ui/mainwindow.cpp
@@ -63,6 +55,8 @@ else()
     src/ui/mainwindow.ui
     src/ui/videorenderwidget.cpp
     src/ui/videorenderwidget.h
+    src/videoplayer.cpp
+    src/videoplayer.h
   )
 endif()
 
