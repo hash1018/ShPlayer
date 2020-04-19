@@ -28,7 +28,7 @@ private:
 
 public:
     VideoRenderWidget(QWidget *parent = nullptr);
-    ~VideoRenderWidget();
+    ~VideoRenderWidget() override;
 
 
 public:
