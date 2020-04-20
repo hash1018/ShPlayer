@@ -47,7 +47,7 @@
   <customwidget>
    <class>VideoRenderWidget</class>
    <extends>QOpenGLWidget</extends>
-   <header>src/ui/videorenderwidget2.h</header>
+   <header>src/ui/videorenderwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -178,6 +178,7 @@ void VideoRenderWidget::paintGL() {
 
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, g_indices);
+
     this->shaderProgram->release();
 
 }
