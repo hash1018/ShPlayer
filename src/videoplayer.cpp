@@ -2,7 +2,7 @@
 #include "videoplayer.h"
 #include <qdebug.h>
 #include "src/shplayer-ffmpeg/demuxer.h"
-#include "src/ui/videorenderwidget.h"
+#include "src/ui/videorenderwidget2.h"
 #include "src/shplayer-ffmpeg/videodecoder.h"
 #include <qtimer.h>
 
@@ -40,6 +40,7 @@ void VideoPlayer::play() {
     }
 
     this->videoRenderWidget->setVideoSize(this->demuxer->getWidth(),this->demuxer->getHeight());
+
 
     if(this->demuxer->isOpened() == true) {
 
@@ -87,6 +88,7 @@ void VideoPlayer::resume() {
 
 void VideoPlayer::timePassed() {
 
+    qDebug() << "VideoPlayer::timePassed";
     Packet packet;
     Frame frame;
 
@@ -94,7 +96,7 @@ void VideoPlayer::timePassed() {
 
         if(packet.getPacketType() == PacketType::VideoPacket) {
 
-            if(this->videoDecoder->decode(packet,frame)==true){
+            if(this->videoDecoder->decode(packet,frame)==true) {
 
                 qDebug () << "frame Index  "  << frame.getFrameIndex();
                 qDebug() << "frame pts " << frame.getPts();
@@ -102,8 +104,10 @@ void VideoPlayer::timePassed() {
 
                 this->videoRenderWidget->update(frame.getBuffer(),frame.getBufferSize());
 
-                 QTimer::singleShot(this->demuxer->getVideoFps(),this,&VideoPlayer::timePassed);
+
+
             }
+            QTimer::singleShot(this->demuxer->getVideoFps(),this,&VideoPlayer::timePassed);
         }
     }
     else{
