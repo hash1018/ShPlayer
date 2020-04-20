@@ -4,15 +4,23 @@
 
 
 #include <qstring.h>
+#include <qobject.h>
+
+class Demuxer;
 
 class VideoRenderWidget;
+class VideoDecoder;
 
 
-class VideoPlayer {
+class VideoPlayer : public QObject {
 
 private:
     QString filePath;
     VideoRenderWidget *videoRenderWidget;
+
+private:
+    Demuxer *demuxer;
+    VideoDecoder *videoDecoder;
 
 public:
     VideoPlayer(const QString &filePath);
@@ -24,6 +32,9 @@ public:
     void stop();
     void pause();
     void resume();
+
+private slots:
+    void timePassed();
 
 };
 

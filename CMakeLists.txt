@@ -45,6 +45,16 @@ add_executable(ShPlayer
     src/ui/videorenderwidget.h
     src/videoplayer.cpp
     src/videoplayer.h
+    src/shplayer-ffmpeg/demuxer.cpp
+    src/shplayer-ffmpeg/demuxer.h
+    src/shplayer-ffmpeg/packet.cpp
+    src/shplayer-ffmpeg/packet.h
+    src/shplayer-ffmpeg/videodecoder.cpp
+    src/shplayer-ffmpeg/videodecoder.h
+    src/shplayer-ffmpeg/codecinfo.cpp
+    src/shplayer-ffmpeg/codecinfo.h
+    src/shplayer-ffmpeg/frame.cpp
+    src/shplayer-ffmpeg/frame.h
  )
 
 
