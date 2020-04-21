@@ -55,10 +55,10 @@ float color[] ={
 
 float position [] = {
 
-    -0.5f, 0.5f, 0.0f,
-    0.5f, 0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    -0.5f, -0.5f, 0.0f
+    -1.0f, 1.0f, 0.0f,    // index 0     topLeft
+    1.0f, 1.0f, 0.0f,     //  index 1    topRight
+    1.0f, -1.0f, 0.0f,    //  index 2    bottomRight
+    -1.0f, -1.0f, 0.0f    //  index 3    bottomLeft
 
 };
 
