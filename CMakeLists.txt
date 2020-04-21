@@ -55,8 +55,10 @@ add_executable(ShPlayer
     src/shplayer-ffmpeg/frame.h
     #src/ui/videorenderwidget.cpp
     #src/ui/videorenderwidget.h
-    src/ui/videorenderwidget2.cpp
-    src/ui/videorenderwidget2.h
+    #src/ui/videorenderwidget2.cpp
+    #src/ui/videorenderwidget2.h
+    src/ui/videorenderwidget3.cpp
+    src/ui/videorenderwidget3.h
  )
 
 

@@ -2,7 +2,13 @@
 #include "videoplayer.h"
 #include <qdebug.h>
 #include "src/shplayer-ffmpeg/demuxer.h"
+
+
+#include "src/ui/videorenderwidget3.h"
 #include "src/ui/videorenderwidget2.h"
+#include "src/ui/videorenderwidget.h"
+
+
 #include "src/shplayer-ffmpeg/videodecoder.h"
 #include <qtimer.h>
 
