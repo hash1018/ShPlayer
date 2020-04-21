@@ -96,13 +96,14 @@ void VideoRenderWidget::initializeGL() {
 
     glEnableVertexAttribArray(textureHandle);
 
+    /*
     int i=this->shaderProgram->uniformLocation("Ytex");
     glUniform1i(i, 0);
     i=this->shaderProgram->uniformLocation("Utex");
     glUniform1i(i, 1);
     i=this->shaderProgram->uniformLocation("Vtex");
     glUniform1i(i, 2);
-
+*/
 
     ///////////////////////////////////////////////////////////////////////////
 
