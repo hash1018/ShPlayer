@@ -281,29 +281,32 @@ void VideoRenderWidget::paintGL() {
     int uIndex = this->videoWidth * this->videoHeight;
     int vIndex = uIndex + (uIndex / 4);
 
-    int i = glGetUniformLocation(this->sharderProgram,"Utex");
-    glUniform1i(i,1);
+
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, this->uTexture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->videoWidth / 2, this->videoHeight / 2 ,
                     GL_LUMINANCE, GL_UNSIGNED_BYTE, &this->buffer[uIndex]);
+    int i = glGetUniformLocation(this->sharderProgram,"Utex");
+    glUniform1i(i,1);
 
 
 
-    i = glGetUniformLocation(this->sharderProgram,"Vtex");
-    glUniform1i(i,2);
+
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, this->vTexture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->videoWidth / 2, this->videoHeight / 2,
                     GL_LUMINANCE, GL_UNSIGNED_BYTE, &this->buffer[vIndex]);
+    i = glGetUniformLocation(this->sharderProgram,"Vtex");
+    glUniform1i(i,2);
 
 
-    i = glGetUniformLocation(this->sharderProgram,"Ytex");
-    glUniform1i(i,0);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->yTexture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->videoWidth, this->videoHeight,
                     GL_LUMINANCE, GL_UNSIGNED_BYTE, this->buffer);
+    i = glGetUniformLocation(this->sharderProgram,"Ytex");
+    glUniform1i(i,0);
 
 
     //중복없이 사각형
@@ -321,7 +324,7 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
 
 
     //UTexture
-    glGenTextures(2, &this->uTexture);
+    glGenTextures(1, &this->uTexture);
     glBindTexture(GL_TEXTURE_2D, this->uTexture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -336,6 +339,7 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    /*
     GLint Utex = glGetUniformLocation(this->sharderProgram, "Utex");
 
     if(Utex == -1){
@@ -344,12 +348,12 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
     }
 
     glUniform1i(Utex,1);
-
+*/
 
 
 
     //VTexture
-    glGenTextures(3, &this->vTexture);
+    glGenTextures(1, &this->vTexture);
     glBindTexture(GL_TEXTURE_2D, this->vTexture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -364,6 +368,7 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    /*
     GLint Vtex = glGetUniformLocation(this->sharderProgram, "Vtex");
 
     if(Vtex == -1){
@@ -372,7 +377,7 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
     }
 
     glUniform1i(Vtex,2);
-
+*/
 
 
 
@@ -391,7 +396,7 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL);
 
     glBindTexture(GL_TEXTURE_2D, 0);
-
+/*
     GLint Ytex = glGetUniformLocation(this->sharderProgram, "Ytex");
 
     if(Ytex == -1){
@@ -400,7 +405,7 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
     }
 
     glUniform1i(Ytex,0);
-
+*/
 
 
     this->initializedTexture = true;
