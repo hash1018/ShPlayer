@@ -4,55 +4,12 @@
 #include <qopenglshaderprogram.h>
 #include <qopengltexture.h>
 
-/*
-float position[] = {
-
-    0.0f,  0.5f, 0.0f,    // 위 중앙
-    0.5f, -0.5f, 0.0f,    // 오른쪽 아래
-    -0.5f,-0.5f, 0.0f     // 왼쪽 아래
-
-};
-
-float color[] = {
-
-    1.0f, 0.0f, 0.0f,   //red
-    0.0f, 1.0f, 0.0f,   //green
-    0.0f, 0.0f, 1.0f    // blue
-};
-*/
-
-/*
-
-  //사각형 하지만,,, 중복 있음
-float position[]={
-
-    -0.5f, 0.5f, 0.0f,
-    0.5f, 0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    -0.5f, -0.5f, 0.0f,
-    -0.5f, 0.5f, 0.0f
-
-};
-
-float color[] ={
-    1.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, 0.0f, 0.0f
-
-
-};
-
-*/
-
 
 //////////////////////////////////////
 
 //중복없이 사각형
 
+/*
 float position [] = {
 
     -1.0f, 1.0f, 0.0f,    // index 0     topLeft
@@ -62,14 +19,6 @@ float position [] = {
 
 };
 
-float color [] = {
-
-    1.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f,
-    1.0f, 1.0f, 1.0f
-
-};
 
 GLuint elements[] = {
 
@@ -77,29 +26,76 @@ GLuint elements[] = {
     2, 3, 0
 };
 
+float textureCoordinate[] = {
+
+    0.0f, 1.0f,
+    1.0f, 1.0f,
+    0.0f, 0.0f,
+    1.0f, 0.0f
+};
+*/
+
+float position [] = {
+
+    -1.0f, 1.0f, 0.0f,    //  index 0     topLeft
+    -1.0f, -1.0f, 0.0f,     //  index 1    bottomLeft
+    1.0f, -1.0f, 0.0f,    //  index 2    bottomRight
+    1.0f, 1.0f, 0.0f    //  index 3    topRight
+
+};
+
+
+GLuint elements[] = {
+
+    0, 1, 2, 3
+    //0, 2, 3
+};
+
+float textureCoordinate[] = {
+
+    0.0f, 0.0f,
+    0.0f, 1.0f,
+    1.0f, 1.0f,
+    1.0f, 0.0f
+};
+
 
 /////////////////////////////////////////
 
 const GLchar* vertexShaderSource =
         "attribute vec3 positionAttribute;\n"
-        "attribute vec3 colorAttribute;\n"
-        "varying vec3 passColorAttribute;\n"
+        "attribute vec2 textureCoordinateAttribute;\n"
+        "varying vec2 passTextureCoordinateAttribute;\n"
         "void main(void)\n"
         "{\n"
         "gl_Position = vec4(positionAttribute, 1.0);\n"
-        "passColorAttribute = colorAttribute;\n"
+        "passTextureCoordinateAttribute = textureCoordinateAttribute;\n"
         "}";
 
 const GLchar* fragmentShaderSource =
-        "varying vec3 passColorAttribute;\n"
+        "varying vec2 passTextureCoordinateAttribute;\n"
+        "uniform sampler2D Ytex;\n"
+        "uniform sampler2D Utex;\n"
+        "uniform sampler2D Vtex;\n"
         "void main()\n"
         "{\n"
-        "gl_FragColor = vec4(passColorAttribute, 1.0);\n"
+        "vec3 yuv;\n"
+        "vec3 rgb;\n"
+        "\n"
+        "yuv.x = texture2D(Ytex, passTextureCoordinateAttribute).r;\n"
+        "yuv.y = texture2D(Utex, passTextureCoordinateAttribute).r - 0.5;\n"
+        "yuv.z = texture2D(Vtex, passTextureCoordinateAttribute).r - 0.5;\n"
+        "rgb = mat3(1,      1,          1,          \n"
+        "           0,  -0.39465,   2.03211,        \n"
+        "         1.13983, -0.58060,    0           \n"
+        "                                )*yuv;  \n"
+        "\n"
+        "gl_FragColor = vec4(rgb, 1);\n"
         "}";
 
 VideoRenderWidget::VideoRenderWidget(QWidget *parent)
     :QOpenGLWidget(parent), initializedTexture(false), videoWidth(0), videoHeight(0),
-      buffer(nullptr) {
+      buffer(nullptr),vao(this) {
 
 
 
@@ -110,10 +106,8 @@ VideoRenderWidget::~VideoRenderWidget(){
     if(this->buffer!=nullptr)
         delete [] this->buffer;
 
+    makeCurrent();
 
-    glUseProgram(0);
-    this->vao.release();
-    this->vao.destroy();
 
 }
 
@@ -124,13 +118,21 @@ void VideoRenderWidget::initializeGL() {
     this->initializeOpenGLFunctions();
 
 
+    //VertexBufferObject 에 데이터 복사   (gpu에서 바로 사용하기 위해)
     glGenBuffers(1, &this->positionVbo);
     glBindBuffer(GL_ARRAY_BUFFER, this->positionVbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(position), position, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(position), position, GL_DYNAMIC_DRAW);
 
-    glGenBuffers(1, &this->colorVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, this->colorVbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
+
+    glGenBuffers(1,&this->textureVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, this->textureVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(textureCoordinate),textureCoordinate, GL_DYNAMIC_DRAW);
+
+
+
+
+
+    /////////////// 쉐이더
 
 
 
@@ -166,6 +168,7 @@ void VideoRenderWidget::initializeGL() {
     ////////////////////////////////////////////////////////////////////////
 
 
+    ////// 프로그램
     this->sharderProgram = glCreateProgram();
 
     glAttachShader(this->sharderProgram, this->vertexShader);
@@ -190,12 +193,13 @@ void VideoRenderWidget::initializeGL() {
     vao.bind();
 
 
+
     ///////////////////////////
     // 중복없이 사각형
     ////////////////////////////////
     glGenBuffers(1, &this->elementBufferObject);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->elementBufferObject);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_DYNAMIC_DRAW);
     ////////////////////////////
 
 
@@ -225,22 +229,24 @@ void VideoRenderWidget::initializeGL() {
     glEnableVertexAttribArray(positionAttribute);
 
 
-    GLint colorAttribute = glGetAttribLocation(this->sharderProgram, "colorAttribute");
-    if(colorAttribute == -1){
 
-        qDebug() << "dddkkkkkkkkkkkkkk";
+
+    //////////////////////////////////////////////
+
+    GLint textureCoordinateAttribute = glGetAttribLocation(this->sharderProgram, "textureCoordinateAttribute");
+    if(textureCoordinateAttribute == -1){
+
+        qDebug() <<"rrr";
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, this->colorVbo);
-    glVertexAttribPointer(colorAttribute, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(colorAttribute);
-
+    glBindBuffer(GL_ARRAY_BUFFER, this->textureVbo);
+    glVertexAttribPointer(textureCoordinateAttribute, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(textureCoordinateAttribute);
 
     vao.release();
 
 
-    glUseProgram(this->sharderProgram);
-    vao.bind();
+
 
 }
 
@@ -249,10 +255,10 @@ void VideoRenderWidget::paintGL() {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-/*
+
     if(this->buffer==nullptr)
         return;
-*/
+
     if(this->videoWidth == 0 || this->videoHeight == 0 )
         return;
 
@@ -261,20 +267,46 @@ void VideoRenderWidget::paintGL() {
         this->initializeTexture(this->videoWidth, this->videoHeight);
     }
 
+    glUseProgram(this->sharderProgram);
+    vao.bind();
+
+    /*
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, this->width(), this->height(),0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+*/
 
 
 
+    int uIndex = this->videoWidth * this->videoHeight;
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, this->uTexture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->videoWidth / 2, this->videoHeight / 2 ,
+                    GL_LUMINANCE, GL_UNSIGNED_BYTE, &this->buffer[uIndex]);
 
-    //삼각형
-    //glDrawArrays(GL_TRIANGLES, 0, 3);
 
 
-    //사각형 중복
-    //glDrawArrays(GL_TRIANGLES,0,6);
+    int vIndex = uIndex + (this->videoWidth * this->videoHeight / 4);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, this->vTexture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->videoWidth / 2, this->videoHeight / 2,
+                    GL_LUMINANCE, GL_UNSIGNED_BYTE, &this->buffer[vIndex]);
+
+
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, this->yTexture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->videoWidth, this->videoHeight,
+                    GL_LUMINANCE, GL_UNSIGNED_BYTE, this->buffer);
 
 
     //중복없이 사각형
-    glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
+    glDrawElements(GL_POLYGON,4,GL_UNSIGNED_INT,0);
+
+
+    vao.release();
+    glUseProgram(0);
 
 
 }
@@ -283,18 +315,99 @@ void VideoRenderWidget::paintGL() {
 void VideoRenderWidget::initializeTexture(int width, int height) {
 
 
+    //UTexture
+    glGenTextures(1, &this->uTexture);
+    glBindTexture(GL_TEXTURE_2D, this->uTexture);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glEnable(GL_TEXTURE_2D);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width/2, height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    GLint Utex = glGetUniformLocation(this->sharderProgram, "Utex");
+
+    if(Utex == -1){
+
+        qDebug() << "Utttt";
+    }
+
+    glUniform1i(Utex,1);
+
+
+
+
+    //VTexture
+    glGenTextures(1, &this->vTexture);
+    glBindTexture(GL_TEXTURE_2D, this->vTexture);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glEnable(GL_TEXTURE_2D);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width/2, height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    GLint Vtex = glGetUniformLocation(this->sharderProgram, "Vtex");
+
+    if(Vtex == -1){
+
+        qDebug() << "Vtttt";
+    }
+
+    glUniform1i(Vtex,2);
+
+
+
+
+    //YTexture
+    glGenTextures(1, &this->yTexture);
+    glBindTexture(GL_TEXTURE_2D, this->yTexture);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glEnable(GL_TEXTURE_2D);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    GLint Ytex = glGetUniformLocation(this->sharderProgram, "Ytex");
+
+    if(Ytex == -1){
+
+        qDebug() << "Ytttt";
+    }
+
+    glUniform1i(Ytex,0);
+
+
+
+    this->initializedTexture = true;
 }
 
 void VideoRenderWidget::update(const uint8_t *buffer, int size){
 
-/*
+
     if(this->buffer!=nullptr)
         delete [] this->buffer;
 
     this->buffer= new uint8_t[size];
 
     memcpy(this->buffer,buffer,size);
-*/
+
     QOpenGLWidget::update();
 
 }

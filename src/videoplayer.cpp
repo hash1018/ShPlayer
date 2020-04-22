@@ -92,11 +92,15 @@ void VideoPlayer::resume() {
     }
 }
 
+#include <qelapsedtimer.h>
 void VideoPlayer::timePassed() {
 
     qDebug() << "VideoPlayer::timePassed";
     Packet packet;
     Frame frame;
+
+    QElapsedTimer timer;
+    timer.start();
 
     if(this->demuxer->readPacket(packet) == true) {
 
@@ -107,6 +111,7 @@ void VideoPlayer::timePassed() {
                 qDebug () << "frame Index  "  << frame.getFrameIndex();
                 qDebug() << "frame pts " << frame.getPts();
                 qDebug() << "frame realtime  "  << frame.getPtsRealTime();
+                 qDebug() << " timer elapsed   " << timer.elapsed();
 
                 this->videoRenderWidget->update(frame.getBuffer(),frame.getBufferSize());
 

@@ -32,14 +32,14 @@ private:
 
 
     GLuint elementBufferObject;
-/*
-private:
-    QOpenGLShader *vertexShader;
-    QOpenGLShader *fragmentShader;
-    QOpenGLShaderProgram *shaderProgram;
-    QOpenGLBuffer *positionVbo;
-    QOpenGLBuffer *colorVbo;
-*/
+
+
+    GLuint textureVbo;
+
+
+    GLuint yTexture;
+    GLuint uTexture;
+    GLuint vTexture;
 
 public:
     VideoRenderWidget(QWidget *parent = nullptr);
