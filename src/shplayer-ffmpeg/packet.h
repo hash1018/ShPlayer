@@ -19,7 +19,7 @@ enum PacketType{
 
 class Packet {
 
-    friend class Demuxer;
+    friend class VideoFileRead;
     friend class VideoDecoder;
 
 private:

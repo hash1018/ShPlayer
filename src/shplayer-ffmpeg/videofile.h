@@ -1,6 +1,6 @@
 
-#ifndef DEMUXER_H
-#define DEMUXER_H
+#ifndef VIDEOFILE_H
+#define VIDEOFILE_H
 
 extern "C"{
 
@@ -13,7 +13,9 @@ extern "C"{
 
 class CodecInfo;
 
-class Demuxer {
+class VideoFileRead {
+
+    friend class VideoFileUtil;
 
 private:
     AVFormatContext *avFormatContext;
@@ -32,8 +34,8 @@ private:
     PacketType packetTypeToRead;
 
 public:
-    Demuxer();
-    ~Demuxer();
+    VideoFileRead();
+    ~VideoFileRead();
 
     bool open(const char *filePath, PacketType packetTypeToRead);
     bool readPacket(Packet &outPacket);
@@ -53,4 +55,4 @@ public:
 
 };
 
-#endif // DEMUXER_H
+#endif // VIDEOFILE_H

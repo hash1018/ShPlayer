@@ -17,12 +17,15 @@ struct AVStream;
 
 class VideoDecoder {
 
+    friend class VideoFileUtil;
+
 private:
     AVCodecContext *avCodecContext;
     SwsContext *swsContext;
     bool initializedCodec;
 
     const AVStream *stream;
+    AVFrame *avFrame;
 
 public:
     VideoDecoder();

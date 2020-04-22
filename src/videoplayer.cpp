@@ -1,24 +1,19 @@
 
 #include "videoplayer.h"
 #include <qdebug.h>
-#include "src/shplayer-ffmpeg/demuxer.h"
-
-
-#include "src/ui/videorenderwidget3.h"
-#include "src/ui/videorenderwidget2.h"
+#include "src/shplayer-ffmpeg/videofile.h"
 #include "src/ui/videorenderwidget.h"
-
-
 #include "src/shplayer-ffmpeg/videodecoder.h"
 #include <qtimer.h>
+#include "src/shplayer-ffmpeg/videofileutil.h"
 
 VideoPlayer::VideoPlayer(const QString &filePath)
-    :filePath(filePath), videoRenderWidget(nullptr), demuxer(nullptr), videoDecoder(nullptr) {
+    :filePath(filePath), videoRenderWidget(nullptr), videoFile(nullptr), videoDecoder(nullptr) {
 
 
-    this->demuxer = new Demuxer;
+    this->videoFile = new VideoFileRead;
 
-    if(this->demuxer->open(filePath.toUtf8(), PacketType::VideoPacket) == false){
+    if(this->videoFile->open(filePath.toUtf8(), PacketType::VideoPacket) == false){
 
         qDebug() << "VideoPlayer::VideoPlayer failed to open demuxer";
     }
@@ -31,8 +26,8 @@ VideoPlayer::VideoPlayer(const QString &filePath)
 
 VideoPlayer::~VideoPlayer() {
 
-    if(this->demuxer != nullptr)
-        delete this->demuxer;
+    if(this->videoFile != nullptr)
+        delete this->videoFile;
 
 }
 
@@ -45,13 +40,13 @@ void VideoPlayer::play() {
         return;
     }
 
-    this->videoRenderWidget->setVideoSize(this->demuxer->getWidth(),this->demuxer->getHeight());
+    this->videoRenderWidget->setVideoSize(this->videoFile->getWidth(), this->videoFile->getHeight());
 
 
-    if(this->demuxer->isOpened() == true) {
+    if(this->videoFile->isOpened() == true) {
 
         CodecInfo codecInfo;
-        if(this->demuxer->getVideoCodecInfo(codecInfo) ==false){
+        if(this->videoFile->getVideoCodecInfo(codecInfo) ==false){
 
             qDebug() <<" failed to get VideoCodecInfo";
             return;
@@ -63,7 +58,9 @@ void VideoPlayer::play() {
             videoDecoder->setCodec(codecInfo);
         }
 
-        QTimer::singleShot(this->demuxer->getVideoFps(), this, &VideoPlayer::timePassed);
+        VideoFileUtil::seek(50,this->videoFile,this->videoDecoder);
+
+        QTimer::singleShot(this->videoFile->getVideoFps(), this, &VideoPlayer::timePassed);
     }
 }
 
@@ -102,7 +99,7 @@ void VideoPlayer::timePassed() {
     QElapsedTimer timer;
     timer.start();
 
-    if(this->demuxer->readPacket(packet) == true) {
+    if(this->videoFile->readPacket(packet) == true) {
 
         if(packet.getPacketType() == PacketType::VideoPacket) {
 
@@ -118,7 +115,7 @@ void VideoPlayer::timePassed() {
 
 
             }
-            QTimer::singleShot(this->demuxer->getVideoFps(),this,&VideoPlayer::timePassed);
+            QTimer::singleShot(this->videoFile->getVideoFps(),this,&VideoPlayer::timePassed);
         }
     }
     else{

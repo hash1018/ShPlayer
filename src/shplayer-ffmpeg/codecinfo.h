@@ -12,7 +12,7 @@ struct AVStream;
 
 class CodecInfo {
 
-    friend class Demuxer;
+    friend class VideoFileRead;
     friend class VideoDecoder;
 
 public:

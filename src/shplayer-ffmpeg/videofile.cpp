@@ -1,22 +1,22 @@
 
-#include "demuxer.h"
+#include "videofile.h"
 
 
-Demuxer::Demuxer()
+VideoFileRead::VideoFileRead()
     :avFormatContext(NULL), width(0), height(0),
       videoStreamIndex(-1), audioStreamIndex(-1), subtitleStreamIndex(-1),
       opened(false), closed(false), packetTypeToRead(PacketType::Nothing) {
 
 }
 
-Demuxer::~Demuxer() {
+VideoFileRead::~VideoFileRead() {
 
     if(this->opened==true && this->closed==false)
         this->close();
 
 }
 
-bool Demuxer::open(const char *filePath, PacketType packetTypeToRead){
+bool VideoFileRead::open(const char *filePath, PacketType packetTypeToRead){
 
     if(this->opened == true) {
 
@@ -61,11 +61,13 @@ bool Demuxer::open(const char *filePath, PacketType packetTypeToRead){
 
         if(avCodecParameters->codec_type == AVMEDIA_TYPE_VIDEO) {
 
+            //No matter packetTypeToRead is videopacket or not, size should be saved.
+            this->width = avCodecParameters->width;
+            this->height = avCodecParameters->height;
+
             if( (packetTypeToRead & PacketType::VideoPacket) == PacketType::VideoPacket ) {
 
-                this->videoStreamIndex = i;
-                this->width = avCodecParameters->width;
-                this->height = avCodecParameters->height;
+                this->videoStreamIndex = i;    
             }
         }
         else if(avCodecParameters->codec_type == AVMEDIA_TYPE_AUDIO) {
@@ -120,7 +122,7 @@ bool Demuxer::open(const char *filePath, PacketType packetTypeToRead){
 }
 
 
-bool Demuxer::readPacket(Packet &outPacket) {
+bool VideoFileRead::readPacket(Packet &outPacket) {
 
     if(this->opened == false) {
 
@@ -167,7 +169,7 @@ bool Demuxer::readPacket(Packet &outPacket) {
     return false;
 }
 
-bool Demuxer::close() {
+bool VideoFileRead::close() {
 
     if(this->opened == false)
         return false;
@@ -184,7 +186,7 @@ bool Demuxer::close() {
 
 }
 
-bool Demuxer::getVideoCodecInfo(CodecInfo &codecInfo){
+bool VideoFileRead::getVideoCodecInfo(CodecInfo &codecInfo){
 
     if(this->closed==true) {
 
@@ -212,17 +214,17 @@ bool Demuxer::getVideoCodecInfo(CodecInfo &codecInfo){
     return false;
 }
 
-bool Demuxer::getAudioCodecInfo(CodecInfo &codecInfo){
+bool VideoFileRead::getAudioCodecInfo(CodecInfo &codecInfo){
 
     return false;
 }
 
-bool Demuxer::getSubtitleCodecInfo(CodecInfo &codecInfo){
+bool VideoFileRead::getSubtitleCodecInfo(CodecInfo &codecInfo){
 
     return false;
 }
 
-int Demuxer::getVideoFps() {
+int VideoFileRead::getVideoFps() {
 
     if(this->opened == false)
         return -1;

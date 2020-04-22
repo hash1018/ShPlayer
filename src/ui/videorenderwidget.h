@@ -4,6 +4,7 @@
 #include <qopenglwidget.h>
 #include <QOpenGLFunctions>
 #include <qopenglbuffer.h>
+#include <QOpenGLVertexArrayObject>
 
 class QOpenGLTexture;
 class QOpenGLShader;
@@ -19,12 +20,26 @@ private:
     uint8_t *buffer;
 
 private:
-    QOpenGLShader *vertexShader;
-    QOpenGLShader *fragmentShader;
-    QOpenGLShaderProgram *shaderProgram;
-    QOpenGLBuffer *vbo;
-    QOpenGLTexture *texture;
 
+    GLuint positionVbo;
+    GLuint colorVbo;
+    QOpenGLVertexArrayObject vao;  //vertex array object.
+
+    GLuint vertexShader;
+    GLuint fragmentShader;
+
+    GLuint sharderProgram;
+
+
+    GLuint elementBufferObject;
+
+
+    GLuint textureVbo;
+
+
+    GLuint yTexture;
+    GLuint uTexture;
+    GLuint vTexture;
 
 public:
     VideoRenderWidget(QWidget *parent = nullptr);

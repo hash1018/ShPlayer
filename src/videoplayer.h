@@ -6,7 +6,7 @@
 #include <qstring.h>
 #include <qobject.h>
 
-class Demuxer;
+class VideoFileRead;
 
 class VideoRenderWidget;
 class VideoDecoder;
@@ -19,7 +19,7 @@ private:
     VideoRenderWidget *videoRenderWidget;
 
 private:
-    Demuxer *demuxer;
+    VideoFileRead *videoFile;
     VideoDecoder *videoDecoder;
 
 public:
