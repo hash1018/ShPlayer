@@ -192,6 +192,7 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
     glActiveTexture(GL_TEXTURE1);
     glGenTextures(2,&m_textureIds[1]);
     glBindTexture(GL_TEXTURE_2D, m_textureIds[1]);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -218,6 +219,7 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
     glActiveTexture(GL_TEXTURE2);
     glGenTextures(3,&m_textureIds[2]);
     glBindTexture(GL_TEXTURE_2D, m_textureIds[2]);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -245,6 +247,7 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
     glActiveTexture(GL_TEXTURE0);
     glGenTextures(1,&m_textureIds[0]);
     glBindTexture(GL_TEXTURE_2D, m_textureIds[0]);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

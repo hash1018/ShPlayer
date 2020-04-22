@@ -47,8 +47,8 @@ float position [] = {
 
 GLuint elements[] = {
 
-    0, 1, 2, 3
-    //0, 2, 3
+    0, 1, 2, //3
+    0, 2, 3
 };
 
 float textureCoordinate[] = {
@@ -88,7 +88,7 @@ const GLchar* fragmentShaderSource =
         "rgb = mat3(1,      1,          1,          \n"
         "           0,  -0.39465,   2.03211,        \n"
         "         1.13983, -0.58060,    0           \n"
-        "                                )*yuv;  \n"
+        "                                ) *  yuv;  \n"
         "\n"
         "gl_FragColor = vec4(rgb, 1);\n"
         "}";
@@ -116,7 +116,6 @@ void VideoRenderWidget::initializeGL() {
 
 
     this->initializeOpenGLFunctions();
-
 
     //VertexBufferObject 에 데이터 복사   (gpu에서 바로 사용하기 위해)
     glGenBuffers(1, &this->positionVbo);
@@ -280,6 +279,10 @@ void VideoRenderWidget::paintGL() {
 
 
     int uIndex = this->videoWidth * this->videoHeight;
+    int vIndex = uIndex + (uIndex / 4);
+
+    int i = glGetUniformLocation(this->sharderProgram,"Utex");
+    glUniform1i(i,1);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, this->uTexture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->videoWidth / 2, this->videoHeight / 2 ,
@@ -287,14 +290,16 @@ void VideoRenderWidget::paintGL() {
 
 
 
-    int vIndex = uIndex + (this->videoWidth * this->videoHeight / 4);
+    i = glGetUniformLocation(this->sharderProgram,"Vtex");
+    glUniform1i(i,2);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, this->vTexture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->videoWidth / 2, this->videoHeight / 2,
                     GL_LUMINANCE, GL_UNSIGNED_BYTE, &this->buffer[vIndex]);
 
 
-
+    i = glGetUniformLocation(this->sharderProgram,"Ytex");
+    glUniform1i(i,0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->yTexture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->videoWidth, this->videoHeight,
@@ -302,7 +307,7 @@ void VideoRenderWidget::paintGL() {
 
 
     //중복없이 사각형
-    glDrawElements(GL_POLYGON,4,GL_UNSIGNED_INT,0);
+    glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
 
 
     vao.release();
@@ -316,14 +321,15 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
 
 
     //UTexture
-    glGenTextures(1, &this->uTexture);
+    glGenTextures(2, &this->uTexture);
     glBindTexture(GL_TEXTURE_2D, this->uTexture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glEnable(GL_TEXTURE_2D);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width/2, height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL);
@@ -343,14 +349,15 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
 
 
     //VTexture
-    glGenTextures(1, &this->vTexture);
+    glGenTextures(3, &this->vTexture);
     glBindTexture(GL_TEXTURE_2D, this->vTexture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glEnable(GL_TEXTURE_2D);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width/2, height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL);
@@ -374,10 +381,11 @@ void VideoRenderWidget::initializeTexture(int width, int height) {
     glBindTexture(GL_TEXTURE_2D, this->yTexture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glEnable(GL_TEXTURE_2D);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL);
