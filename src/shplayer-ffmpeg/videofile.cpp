@@ -239,3 +239,15 @@ int VideoFileRead::getVideoFps() {
 
     return -1;
 }
+
+uint64_t VideoFileRead::getDuration() const {
+
+    if(this->opened == false)
+        return 0;
+
+    if(this->closed == true)
+        return 0;
+
+    return this->avFormatContext->duration / AV_TIME_BASE;
+
+}

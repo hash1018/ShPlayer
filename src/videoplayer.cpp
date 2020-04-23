@@ -19,6 +19,7 @@ VideoPlayer::VideoPlayer(const QString &filePath)
     }
     else{
 
+        qDebug() << this->videoFile->getDuration();
         qDebug () << "VideoPlayer::VideoPlayer succeeded to open demuxer";
     }
 }
@@ -58,7 +59,8 @@ void VideoPlayer::play() {
             videoDecoder->setCodec(codecInfo);
         }
 
-        VideoFileUtil::seek(50,this->videoFile,this->videoDecoder);
+        Frame frame;
+        VideoFileUtil::seek(50, *this->videoFile, *this->videoDecoder, frame);
 
         QTimer::singleShot(this->videoFile->getVideoFps(), this, &VideoPlayer::timePassed);
     }

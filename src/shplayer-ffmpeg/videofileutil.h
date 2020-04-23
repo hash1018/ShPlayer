@@ -5,6 +5,7 @@
 
 class VideoFileRead;
 class VideoDecoder;
+class Frame;
 
 class VideoFileUtil {
 
@@ -14,7 +15,7 @@ public:
 
 
 public:
-    static bool seek(int index, VideoFileRead *videoFileRead, VideoDecoder *videoDecoder);
+    static bool seek(int index, VideoFileRead &videoFileRead, VideoDecoder &videoDecoder, Frame &frame);
 
 
 };

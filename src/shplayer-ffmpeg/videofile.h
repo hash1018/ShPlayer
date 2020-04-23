@@ -53,6 +53,9 @@ public:
 
     int getVideoFps();
 
+    //returns duration in seconds.
+    uint64_t getDuration() const;
+
 };
 
 #endif // VIDEOFILE_H
